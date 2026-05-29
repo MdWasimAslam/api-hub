@@ -1,54 +1,105 @@
 'use strict';
 
-// Load the dataset once at startup (cached in memory).
-const products = require('../data/products.json');
+/**
+ * -------------------------------------------------------------------
+ * File: products.controller.js
+ *
+ * Purpose:
+ *   Handles all product-related requests.
+ *
+ * Responsibilities:
+ *   - List products (with pagination)
+ *   - Search products
+ *   - List the distinct product categories
+ *   - Get a single product by id
+ *
+ * Data Source:
+ *   data/products.json
+ *
+ * Used By:
+ *   routes/products.routes.js
+ *
+ * NOTE: Pagination and search work the same way as movies.controller.js.
+ * -------------------------------------------------------------------
+ */
 
-// GET /products?page=1&limit=10
-function getProducts(req, res) {
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
+// Load the product data once when the server starts.
+const productList = require('../data/products.json');
 
-  const total = products.length;
-  const totalPages = Math.ceil(total / limit);
-  const start = (page - 1) * limit;
-  const results = products.slice(start, start + limit);
+// GET /products?page=1&limit=10  → returns one page of products.
+function getProducts(request, response) {
+  const currentPage = Math.max(parseInt(request.query.page, 10) || 1, 1);
+  const pageSize = Math.max(parseInt(request.query.limit, 10) || 10, 1);
 
-  res.json({ page, limit, total, totalPages, results });
+  const totalProducts = productList.length;
+  const totalPages = Math.ceil(totalProducts / pageSize);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const productsOnThisPage = productList.slice(startIndex, startIndex + pageSize);
+
+  response.json({
+    page: currentPage,
+    limit: pageSize,
+    total: totalProducts,
+    totalPages: totalPages,
+    results: productsOnThisPage,
+  });
 }
 
-// GET /products/search?q=apple
-function searchProducts(req, res) {
-  const q = (req.query.q || '').trim().toLowerCase();
-  if (!q) {
-    return res.status(400).json({ error: 'Query parameter "q" is required.' });
+// GET /products/search?q=apple  → search by name, brand, or category.
+function searchProducts(request, response) {
+  const searchKeyword = (request.query.q || '').trim().toLowerCase();
+
+  if (!searchKeyword) {
+    return response
+      .status(400)
+      .json({ error: 'Query parameter "q" is required.' });
   }
 
-  const results = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q) ||
-      p.brand.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q)
-  );
+  const matchingProducts = productList.filter((product) => {
+    return (
+      product.name.toLowerCase().includes(searchKeyword) ||
+      product.brand.toLowerCase().includes(searchKeyword) ||
+      product.category.toLowerCase().includes(searchKeyword)
+    );
+  });
 
-  res.json({ query: q, total: results.length, results });
+  response.json({
+    query: searchKeyword,
+    total: matchingProducts.length,
+    results: matchingProducts,
+  });
 }
 
-// GET /products/categories
-function getCategories(req, res) {
-  const categories = [...new Set(products.map((p) => p.category))].sort();
-  res.json({ total: categories.length, results: categories });
+/**
+ * GET /products/categories
+ *
+ * Returns the list of unique category names (handy for filter dropdowns
+ * on the frontend). `new Set(...)` removes duplicates automatically, and
+ * the spread `[...]` turns the Set back into a normal array we can sort.
+ */
+function getCategories(request, response) {
+  const allCategoryNames = productList.map((product) => product.category);
+  const uniqueCategories = [...new Set(allCategoryNames)].sort();
+
+  response.json({
+    total: uniqueCategories.length,
+    results: uniqueCategories,
+  });
 }
 
-// GET /products/:id
-function getProductById(req, res) {
-  const id = parseInt(req.params.id, 10);
-  const product = products.find((p) => p.id === id);
+// GET /products/:id  → find one product by id.
+function getProductById(request, response) {
+  const productId = parseInt(request.params.id, 10);
+  const selectedProduct = productList.find((product) => product.id === productId);
 
-  if (!product) {
-    return res.status(404).json({ error: `Product with id ${req.params.id} not found.` });
+  if (!selectedProduct) {
+    return response
+      .status(404)
+      .json({ error: `Product with id ${request.params.id} not found.` });
   }
 
-  res.json(product);
+  response.json(selectedProduct);
 }
 
 module.exports = { getProducts, searchProducts, getCategories, getProductById };

@@ -1,50 +1,91 @@
 'use strict';
 
-// Load the dataset once at startup (cached in memory).
-const users = require('../data/users.json');
+/**
+ * -------------------------------------------------------------------
+ * File: users.controller.js
+ *
+ * Purpose:
+ *   Handles all user-related requests.
+ *
+ * Responsibilities:
+ *   - List users (with pagination)
+ *   - Search users
+ *   - Get a single user by id
+ *
+ * Data Source:
+ *   data/users.json
+ *
+ * Used By:
+ *   routes/users.routes.js
+ *
+ * NOTE: This file follows the EXACT same pattern as movies.controller.js.
+ *       If the pagination/search comments here feel short, read that file
+ *       first — it explains the ideas in full detail.
+ * -------------------------------------------------------------------
+ */
 
-// GET /users?page=1&limit=10
-function getUsers(req, res) {
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
+// Load the user data once when the server starts (same idea as movies).
+const userList = require('../data/users.json');
 
-  const total = users.length;
-  const totalPages = Math.ceil(total / limit);
-  const start = (page - 1) * limit;
-  const results = users.slice(start, start + limit);
+// GET /users?page=1&limit=10  → returns one page of users.
+function getUsers(request, response) {
+  const currentPage = Math.max(parseInt(request.query.page, 10) || 1, 1);
+  const pageSize = Math.max(parseInt(request.query.limit, 10) || 10, 1);
 
-  res.json({ page, limit, total, totalPages, results });
+  const totalUsers = userList.length;
+  const totalPages = Math.ceil(totalUsers / pageSize);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const usersOnThisPage = userList.slice(startIndex, startIndex + pageSize);
+
+  response.json({
+    page: currentPage,
+    limit: pageSize,
+    total: totalUsers,
+    totalPages: totalPages,
+    results: usersOnThisPage,
+  });
 }
 
-// GET /users/search?q=john
-function searchUsers(req, res) {
-  const q = (req.query.q || '').trim().toLowerCase();
-  if (!q) {
-    return res.status(400).json({ error: 'Query parameter "q" is required.' });
+// GET /users/search?q=john  → case-insensitive search across several fields.
+function searchUsers(request, response) {
+  const searchKeyword = (request.query.q || '').trim().toLowerCase();
+
+  if (!searchKeyword) {
+    return response
+      .status(400)
+      .json({ error: 'Query parameter "q" is required.' });
   }
 
-  const results = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(q) ||
-      u.username.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      u.city.toLowerCase().includes(q) ||
-      u.company.toLowerCase().includes(q)
-  );
+  const matchingUsers = userList.filter((user) => {
+    return (
+      user.name.toLowerCase().includes(searchKeyword) ||
+      user.username.toLowerCase().includes(searchKeyword) ||
+      user.email.toLowerCase().includes(searchKeyword) ||
+      user.city.toLowerCase().includes(searchKeyword) ||
+      user.company.toLowerCase().includes(searchKeyword)
+    );
+  });
 
-  res.json({ query: q, total: results.length, results });
+  response.json({
+    query: searchKeyword,
+    total: matchingUsers.length,
+    results: matchingUsers,
+  });
 }
 
-// GET /users/:id
-function getUserById(req, res) {
-  const id = parseInt(req.params.id, 10);
-  const user = users.find((u) => u.id === id);
+// GET /users/:id  → find one user by id.
+function getUserById(request, response) {
+  const userId = parseInt(request.params.id, 10);
+  const selectedUser = userList.find((user) => user.id === userId);
 
-  if (!user) {
-    return res.status(404).json({ error: `User with id ${req.params.id} not found.` });
+  if (!selectedUser) {
+    return response
+      .status(404)
+      .json({ error: `User with id ${request.params.id} not found.` });
   }
 
-  res.json(user);
+  response.json(selectedUser);
 }
 
 module.exports = { getUsers, searchUsers, getUserById };

@@ -1,19 +1,41 @@
 'use strict';
 
 /**
- * Generates the sample datasets: data/movies.json (100) and data/users.json (50).
+ * -------------------------------------------------------------------
+ * File: scripts/generate-data.js
  *
- * Run with:  npm run seed
- * Re-run any time you want to regenerate the sample data.
+ * Purpose:
+ *   Creates the sample data files the API serves:
+ *     - data/movies.json   (100 movies)
+ *     - data/users.json    (50 users)
+ *     - data/products.json (100 products)
+ *     - data/posts.json    (100 posts)
+ *
+ * Why a generator instead of typing JSON by hand?
+ *   Writing hundreds of records by hand is slow and error-prone.
+ *   This script builds them from small word lists using simple loops.
+ *
+ * Is it random?
+ *   No. It uses the item's position (index) in simple formulas, so the
+ *   output is the SAME every time you run it — easy to learn from.
+ *
+ * Run with:
+ *   npm run seed
+ *   (The generated .json files are also committed, so you rarely need to.)
+ * -------------------------------------------------------------------
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs');     // Node's File System module (to write files)
+const path = require('path'); // builds safe file paths across operating systems
 
+// Folder where the .json files will be written (the project's /data folder).
 const dataDir = path.join(__dirname, '..', 'data');
 
-// ─── Helpers ──────────────────────────────────────────────────────
-const pick = (arr, i) => arr[i % arr.length];
+// ─── Helper ───────────────────────────────────────────────────────
+// Pick an item from a list using an index, looping back to the start when
+// the index goes past the end (the "% length" keeps it in range).
+// Example: pick(['a','b'], 0)='a', pick(['a','b'], 1)='b', pick(['a','b'], 2)='a'
+const pick = (list, index) => list[index % list.length];
 
 // ─── Movies ───────────────────────────────────────────────────────
 const adjectives = [

@@ -1,7 +1,7 @@
 {
   "name": "api-hub",
   "version": "1.0.0",
-  "description": "A simple Express API with local JSON data, Swagger UI, and Vercel deployment.",
+  "description": "A beginner-friendly Express API with local JSON data and a built-in API Explorer — for learning frontend development and how APIs work.",
   "main": "api/index.js",
   "scripts": {
     "dev": "node server.js",

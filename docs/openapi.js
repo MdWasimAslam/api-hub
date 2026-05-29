@@ -1,10 +1,33 @@
 'use strict';
 
 /**
- * OpenAPI 3.0 specification for API Hub.
- * Served as JSON at GET /openapi.json and rendered by Swagger UI at "/".
+ * -------------------------------------------------------------------
+ * File: docs/openapi.js
+ *
+ * Purpose:
+ *   Describes every endpoint of this API in a standard format called
+ *   "OpenAPI". It is just a big JavaScript object — a structured
+ *   description of the API (paths, query parameters, examples...).
+ *
+ * WHAT IS OpenAPI (in plain words)?
+ *   A common "menu" format that tools understand. Once an API is
+ *   described this way, many tools can read it automatically — including
+ *   our own API Explorer (docs/explorer.js).
+ *
+ * HOW IT IS USED HERE:
+ *   - app.js serves this object as JSON at GET /openapi.json
+ *   - docs/explorer.js fetches that JSON and draws a "try it" form
+ *     for every endpoint listed below.
+ *
+ * TO DOCUMENT A NEW ENDPOINT:
+ *   Add an entry under `paths` (copy an existing one and edit it).
+ *   That's it — the Explorer will show it automatically.
+ *
+ * Used By:
+ *   app.js (served as /openapi.json) and docs/explorer.js (rendered)
+ * -------------------------------------------------------------------
  */
-const openapi = {
+const openApiSpec = {
   openapi: '3.0.0',
   info: {
     title: 'API Hub',
@@ -236,4 +259,4 @@ const openapi = {
   },
 };
 
-module.exports = openapi;
+module.exports = openApiSpec;
