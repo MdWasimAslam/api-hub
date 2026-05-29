@@ -1,0 +1,10 @@
+{
+  "name": "api-hub",
+  "version": "1.0.0",
+  "description": "A simple Vercel Node.js project",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy"
+  },
+  "license": "MIT"
+}

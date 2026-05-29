@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Hub</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 640px;
+        margin: 4rem auto;
+        padding: 0 1rem;
+        line-height: 1.6;
+      }
+      code {
+        background: #f4f4f4;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>API Hub</h1>
+    <p>A simple Vercel Node.js project.</p>
+    <p>
+      Try the API endpoint:
+      <a href="/api/hello?name=Wasim"><code>/api/hello?name=Wasim</code></a>
+    </p>
+    <pre id="output">Loading…</pre>
+    <script>
+      fetch("/api/hello?name=Wasim")
+        .then((r) => r.json())
+        .then((data) => {
+          document.getElementById("output").textContent = JSON.stringify(
+            data,
+            null,
+            2
+          );
+        })
+        .catch((e) => {
+          document.getElementById("output").textContent = "Error: " + e.message;
+        });
+    </script>
+  </body>
+</html>
